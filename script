@@ -831,6 +831,14 @@ joinBtn.MouseButton1Click:Connect(function()
     end
 end)
 
+TeleportService.TeleportInitFailed:Connect(function(player, teleportResult, errorMessage)
+    if player == LocalPlayer then
+        teleporting = false
+        -- silently fail
+    end
+end)
+
+
 -- Base Timer
 -- Base Timer
 -- Base Timer
