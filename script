@@ -885,10 +885,27 @@ end
 -- Base Timer
 
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
 local handled = {}
+local labelConnections = {}
+
+local function getTimeLabel(plot)
+	local purchases = plot:FindFirstChild("Purchases")
+	if not purchases then return nil end
+
+	for _, block in ipairs(purchases:GetChildren()) do
+		if block.Name == "PlotBlock" then
+			local main = block:FindFirstChild("Main")
+			local gui = main and main:FindFirstChildWhichIsA("BillboardGui")
+			local found = gui and gui:FindFirstChild("RemainingTime")
+			if found and found:IsA("TextLabel") then
+				return found
+			end
+		end
+	end
+	return nil
+end
 
 local function createBillboard(plot, label, timeLabel)
 	local friendPanel = plot:FindFirstChild("FriendPanel")
@@ -896,21 +913,26 @@ local function createBillboard(plot, label, timeLabel)
 	if not friendMain then return end
 
 	local oldGui = friendMain:FindFirstChild("RemainingTimeBillboard")
-	if oldGui then oldGui:Destroy() end
-
-	if label.Text == "Empty Base" then
-		handled[plot] = nil
-		return
+	local oldSize, oldOffset, oldAdornee, oldParent
+	if oldGui then
+		oldSize = oldGui.Size
+		oldOffset = oldGui.StudsOffset
+		oldAdornee = oldGui.Adornee
+		oldParent = oldGui.Parent
+		oldGui:Destroy()
 	end
+
+	local parentToUse = oldParent or friendMain
+	local adorneeToUse = oldAdornee or friendMain.Parent
 
 	local gui = Instance.new("BillboardGui")
 	gui.Name = "RemainingTimeBillboard"
-	gui.Size = UDim2.new(0, 40, 0, 20)
-	gui.StudsOffset = Vector3.new(0, 5, 0)
+	gui.Size = oldSize or UDim2.new(0, 40, 0, 20)
+	gui.StudsOffset = oldOffset or Vector3.new(0, 5, 0)
 	gui.AlwaysOnTop = true
 	gui.MaxDistance = math.huge
-	gui.Adornee = friendMain.Parent
-	gui.Parent = friendMain
+	gui.Adornee = adorneeToUse
+	gui.Parent = parentToUse
 
 	local text = Instance.new("TextLabel")
 	text.Size = UDim2.new(1, 0, 1, 0)
@@ -919,6 +941,7 @@ local function createBillboard(plot, label, timeLabel)
 	text.Font = Enum.Font.FredokaOne
 	text.TextColor3 = Color3.fromRGB(0, 255, 0)
 	text.Text = timeLabel.Text
+	text.Name = "RemainingText"
 	text.Parent = gui
 
 	local stroke = Instance.new("UIStroke")
@@ -927,18 +950,27 @@ local function createBillboard(plot, label, timeLabel)
 	stroke.Parent = text
 
 	timeLabel:GetPropertyChangedSignal("Text"):Connect(function()
-		text.Text = timeLabel.Text
-	end)
-
-	label:GetPropertyChangedSignal("Text"):Connect(function()
-		if label.Text == "Empty Base" then
-			local g = friendMain:FindFirstChild("RemainingTimeBillboard")
-			if g then g:Destroy() end
-			handled[plot] = nil
+		if text and text.Parent then
+			text.Text = timeLabel.Text
 		end
 	end)
 
-	handled[plot] = true
+	return gui
+end
+
+local function updateBillboard(plot, label, timeLabel)
+	local friendPanel = plot:FindFirstChild("FriendPanel")
+	local friendMain = friendPanel and friendPanel:FindFirstChild("Main")
+	if not friendMain then return end
+
+	local gui = friendMain:FindFirstChild("RemainingTimeBillboard")
+	if not gui then
+		gui = createBillboard(plot, label, timeLabel)
+	end
+
+	if gui then
+		gui.Enabled = label.Text ~= "Empty Base"
+	end
 end
 
 local function tryHandlePlot(plot)
@@ -948,44 +980,79 @@ local function tryHandlePlot(plot)
 	local surfaceGui = sign and sign:FindFirstChild("SurfaceGui")
 	local frame = surfaceGui and surfaceGui:FindFirstChild("Frame")
 	local label = frame and frame:FindFirstChildWhichIsA("TextLabel")
-	if not label or label.Text == "Empty Base" then return end
+	if not label then return end
 
-	local purchases = plot:FindFirstChild("Purchases")
-	local timeLabel
-	if purchases then
-		for _, block in ipairs(purchases:GetChildren()) do
-			if block.Name == "PlotBlock" then
-				local main = block:FindFirstChild("Main")
-				local gui = main and main:FindFirstChildWhichIsA("BillboardGui")
-				local found = gui and gui:FindFirstChild("RemainingTime")
-				if found and found:IsA("TextLabel") then
-					timeLabel = found
-					break
-				end
-			end
-		end
+	local timeLabel = getTimeLabel(plot)
+	if not timeLabel then
+		return
 	end
 
-	if timeLabel then
-		createBillboard(plot, label, timeLabel)
+	updateBillboard(plot, label, timeLabel)
+
+	if labelConnections[plot] then
+		labelConnections[plot]:Disconnect()
 	end
+
+	labelConnections[plot] = label:GetPropertyChangedSignal("Text"):Connect(function()
+		updateBillboard(plot, label, timeLabel)
+	end)
+
+	handled[plot] = true
 end
 
-local function scanPlots()
-	local plots = workspace:FindFirstChild("Plots")
-	if not plots then return end
-	for _, plot in ipairs(plots:GetChildren()) do
+local plotsFolder = workspace:FindFirstChild("Plots")
+if plotsFolder then
+	for _, plot in ipairs(plotsFolder:GetChildren()) do
 		if plot:IsA("Model") then
 			tryHandlePlot(plot)
 		end
 	end
-end
 
-scanPlots()
+	plotsFolder.ChildAdded:Connect(function(newPlot)
+		if newPlot:IsA("Model") then
+			tryHandlePlot(newPlot)
+		end
+	end)
+end
 
 task.spawn(function()
 	while true do
-		scanPlots()
+		for plot, _ in pairs(handled) do
+			if plot and plot.Parent then
+				local friendPanel = plot:FindFirstChild("FriendPanel")
+				local friendMain = friendPanel and friendPanel:FindFirstChild("Main")
+				if friendMain then
+					local gui = friendMain:FindFirstChild("RemainingTimeBillboard")
+					if not gui then
+						local sign = plot:FindFirstChild("PlotSign")
+						local surfaceGui = sign and sign:FindFirstChild("SurfaceGui")
+						local frame = surfaceGui and surfaceGui:FindFirstChild("Frame")
+						local label = frame and frame:FindFirstChildWhichIsA("TextLabel")
+
+						local timeLabel
+						local purchases = plot:FindFirstChild("Purchases")
+						if purchases then
+							for _, block in ipairs(purchases:GetChildren()) do
+								if block.Name == "PlotBlock" then
+									local main = block:FindFirstChild("Main")
+									local guiBlock = main and main:FindFirstChildWhichIsA("BillboardGui")
+									local found = guiBlock and guiBlock:FindFirstChild("RemainingTime")
+									if found and found:IsA("TextLabel") then
+										timeLabel = found
+										break
+									end
+								end
+							end
+						end
+
+						if label and timeLabel then
+							local newGui = createBillboard(plot, label, timeLabel)
+							newGui.Enabled = label.Text ~= "Empty Base"
+						end
+					end
+				end
+			end
+		end
 		task.wait(1)
 	end
 end)
