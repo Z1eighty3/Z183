@@ -641,6 +641,7 @@ if RejoinGui == true then
     local screenGui = Instance.new("ScreenGui")
     screenGui.Name = "RejoinCompactUI"
     screenGui.ResetOnSpawn = false
+    screenGui.IgnoreGuiInset = true -- Added to remove top gap
     screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
     screenGui.DisplayOrder = 2147483647
     screenGui.Parent = game:GetService("CoreGui")
@@ -751,6 +752,7 @@ if JobIDJoiner == true then
     local screenGui = Instance.new("ScreenGui")
     screenGui.Name = "JobIDGui"
     screenGui.ResetOnSpawn = false
+    screenGui.IgnoreGuiInset = true -- Added to remove top gap
     screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
     screenGui.DisplayOrder = 2147483647
     screenGui.Parent = game:GetService("CoreGui")
