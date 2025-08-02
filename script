@@ -554,7 +554,7 @@ local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
-local walkSpeed = 90
+local walkSpeed = 85
 local hasUsedTool = false
 
 -- Equips, uses, and unequips the tool
