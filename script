@@ -311,20 +311,22 @@ end
 
 RunService.Heartbeat:Connect(scanAndUpdate)
 
--- Proximity Promt
--- Proximity Promt
--- Proximity Promt
--- Proximity Promt
--- Proximity Promt
--- Proximity Promt
--- Proximity Promt
--- Proximity Promt
+-- Proximity Prompt
+-- Proximity Prompt
+-- Proximity Prompt
+-- Proximity Prompt
+-- Proximity Prompt
+-- Proximity Prompt
+-- Proximity Prompt
+-- Proximity Prompt
+
+local RunService = game:GetService("RunService")
 
 local function isRelevantPrompt(prompt)
 	local text = prompt.ActionText
 	if not text then return false end
 	text = string.lower(text)
-	return text:find("purchase", 1, true) or text:find("sell", 1, true)
+	return text:find("purchase", 1, true) or text:find("toggle", 1, true)
 end
 
 local relevantPrompts = {}
