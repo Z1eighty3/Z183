@@ -621,7 +621,6 @@ end)
 
 local RejoinGui = (_G.RejoinGui == nil) and true or _G.RejoinGui
 local JobIDJoiner = (_G.JobIDJoiner == nil) and true or _G.JobIDJoiner
-d
 
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
