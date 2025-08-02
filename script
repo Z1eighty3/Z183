@@ -1060,3 +1060,36 @@ task.spawn(function()
 		task.wait(1)
 	end
 end)
+
+-- Trap Auto Buy
+-- Trap Auto Buy
+-- Trap Auto Buy
+-- Trap Auto Buy
+-- Trap Auto Buy
+-- Trap Auto Buy
+-- Trap Auto Buy
+-- Trap Auto Buy
+
+local BuyTrap = (_G.BuyTrap == nil) and true or _G.BuyTrap
+
+if BuyTrap then
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+    local Packages = ReplicatedStorage:WaitForChild("Packages")
+    local Net = Packages:WaitForChild("Net")
+    local RequestBuy = Net:WaitForChild("RF/CoinsShopService/RequestBuy")
+
+    local trapItemID = "Trap"
+
+    task.spawn(function()
+        while BuyTrap do
+            local success, err = pcall(function()
+                RequestBuy:InvokeServer(trapItemID)
+            end)
+            if not success then
+                warn("Failed to buy trap:", err)
+            end
+            task.wait(0.5)
+        end
+    end)
+end
