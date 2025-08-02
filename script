@@ -611,7 +611,6 @@ LocalPlayer.CharacterAdded:Connect(function(char)
 	hasUsedTool = false
 end)
 
-
 -- Rejoin GUI
 -- Rejoin GUI
 -- Rejoin GUI
@@ -641,13 +640,15 @@ if RejoinGui == true then
     local screenGui = Instance.new("ScreenGui")
     screenGui.Name = "RejoinCompactUI"
     screenGui.ResetOnSpawn = false
-    screenGui.IgnoreGuiInset = true -- Added to remove top gap
+    screenGui.IgnoreGuiInset = true
     screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
     screenGui.DisplayOrder = 2147483647
     screenGui.Parent = game:GetService("CoreGui")
 
     local UI = Instance.new("Frame")
     UI.Size = UDim2.new(0, 140, 0, 65)
+    UI.AnchorPoint = Vector2.new(1, 0)
+    UI.Position = UDim2.new(1, 0, 0, 0) -- flush right, flush top
     UI.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
     UI.BorderSizePixel = 0
     UI.Parent = screenGui
@@ -752,7 +753,7 @@ if JobIDJoiner == true then
     local screenGui = Instance.new("ScreenGui")
     screenGui.Name = "JobIDGui"
     screenGui.ResetOnSpawn = false
-    screenGui.IgnoreGuiInset = true -- Added to remove top gap
+    screenGui.IgnoreGuiInset = true
     screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
     screenGui.DisplayOrder = 2147483647
     screenGui.Parent = game:GetService("CoreGui")
@@ -760,7 +761,7 @@ if JobIDJoiner == true then
     local UI = Instance.new("Frame")
     UI.Size = UDim2.new(0, 140, 0, 65)
     UI.AnchorPoint = Vector2.new(1, 0)
-    UI.Position = UDim2.new(1, -10, 0, 10)
+    UI.Position = UDim2.new(1, -144, 0, 0) -- 140 width + 4 pixel gap to left of Rejoin GUI
     UI.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
     UI.BorderSizePixel = 0
     UI.Parent = screenGui
