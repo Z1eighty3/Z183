@@ -114,11 +114,10 @@ local function showBillboard(spawnPart, generationText, displayNameText)
 	nameLabel.TextScaled = true
 	nameLabel.Font = Enum.Font.SourceSansBold
 	nameLabel.Text = displayNameText or ""
-	nameLabel.Parent = gui
-
 	nameLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
 	nameLabel.TextStrokeTransparency = 0
-	nameLabel.TextColor3 = Color3.fromHSV(0, 1, 1)
+	nameLabel.TextColor3 = Color3.new(1, 1, 1)
+	nameLabel.Parent = gui
 
 	local nameStroke = Instance.new("UIStroke")
 	nameStroke.Thickness = 2
@@ -133,17 +132,15 @@ local function showBillboard(spawnPart, generationText, displayNameText)
 	genLabel.TextScaled = true
 	genLabel.Font = Enum.Font.SourceSansBold
 	genLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+	genLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+	genLabel.TextStrokeTransparency = 0
 	genLabel.Text = generationText or ""
 	genLabel.Parent = gui
 
-	genLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
-	genLabel.TextStrokeTransparency = 0
 	local genStroke = Instance.new("UIStroke")
 	genStroke.Thickness = 2
 	genStroke.Color = Color3.new(0, 0, 0)
 	genStroke.Parent = genLabel
-
-	nameLabel.TextColor3 = Color3.new(1, 1, 1)
 end
 
 local function clearAllBillboards(spawns)
@@ -159,7 +156,7 @@ local function clearBillboardsOnPlot(plot)
 	if not plot then return end
 	local animalPodiums = plot:FindFirstChild("AnimalPodiums")
 	if not animalPodiums then return end
-	
+
 	for _, podium in ipairs(animalPodiums:GetChildren()) do
 		if podium:IsA("Model") then
 			local base = podium:FindFirstChild("Base")
@@ -192,7 +189,6 @@ local function spawnIsStillValid(spawn)
 end
 
 local function isMyBase(plot)
-	if not plot then return false end
 	local plotSign = plot:FindFirstChild("PlotSign")
 	if plotSign then
 		local yourBase = plotSign:FindFirstChild("YourBase")
@@ -203,14 +199,38 @@ local function isMyBase(plot)
 	return false
 end
 
+local function isFriendBase(plot)
+	local plotSign = plot:FindFirstChild("PlotSign")
+	if not plotSign then return false end
+
+	local surf = plotSign:FindFirstChild("SurfaceGui")
+	if not surf then return false end
+
+	local label = surf:FindFirstChild("Frame") and surf.Frame:FindFirstChild("TextLabel")
+	if not label or not label.Text then return false end
+
+	local textLower = label.Text:lower()
+
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= LocalPlayer and LocalPlayer:IsFriendsWith(player.UserId) then
+			local displayNameLower = player.DisplayName:lower()
+			if textLower:find(displayNameLower .. "'s base") or textLower:find(displayNameLower .. "’s base") then
+				print("[Brainrot ESP] Skipping friend IN GAME base:", plot.Name, "Owner:", player.DisplayName)
+				return true
+			end
+		end
+	end
+
+	return false
+end
+
 local function scanAndUpdate()
 	local spawns = {}
 
 	for _, plot in ipairs(Plots:GetChildren()) do
-		if isMyBase(plot) then
-			-- Clear any existing billboards on your base plot spawns
+		if isMyBase(plot) or isFriendBase(plot) then
 			clearBillboardsOnPlot(plot)
-			continue -- Skip this plot entirely
+			continue
 		end
 
 		local animalPodiums = plot:FindFirstChild("AnimalPodiums")
@@ -225,6 +245,13 @@ local function scanAndUpdate()
 							if attachment then
 								local overhead = attachment:FindFirstChild("AnimalOverhead")
 								if overhead then
+									local stolenLabel = overhead:FindFirstChild("Stolen")
+									if stolenLabel and stolenLabel:IsA("TextLabel") then
+										if stolenLabel.Visible and stolenLabel.Text == "IN MACHINE" then
+											continue
+										end
+									end
+
 									local genLabel = overhead:FindFirstChild("Generation")
 									local displayNameLabel = overhead:FindFirstChild("DisplayName")
 									if genLabel and displayNameLabel then
