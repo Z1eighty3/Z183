@@ -619,252 +619,264 @@ end)
 -- Rejoin GUI
 -- Rejoin GUI
 
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "RejoinCompactUI"
-screenGui.ResetOnSpawn = false
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
-screenGui.DisplayOrder = 2147483647
-screenGui.Parent = game:GetService("CoreGui")
+local RejoinGui = nil
+local JobIDJoiner = nil
 
-local UI = Instance.new("Frame")
-UI.Size = UDim2.new(0, 140, 0, 65)
-UI.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
-UI.BorderSizePixel = 0
-UI.Parent = screenGui
-Instance.new("UICorner", UI).CornerRadius = UDim.new(0, 10)
+if RejoinGui == nil then RejoinGui = true end
+if JobIDJoiner == nil then JobIDJoiner = true end
 
-local outline = Instance.new("Frame")
-outline.Size = UDim2.new(1, 0, 1, 0)
-outline.BackgroundColor3 = Color3.fromRGB(90, 0, 140)
-outline.BorderSizePixel = 0
-outline.ZIndex = UI.ZIndex - 1
-outline.Parent = UI
-Instance.new("UICorner", outline).CornerRadius = UDim.new(0, 10)
-
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 28)
-Title.BackgroundColor3 = Color3.fromRGB(80, 0, 120)
-Title.BorderSizePixel = 0
-Title.Text = "Rejoin Menu"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 16
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.Parent = UI
-Instance.new("UIPadding", Title).PaddingLeft = UDim.new(0, 8)
-Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 8)
-
-local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 24, 0, 24)
-closeBtn.Position = UDim2.new(1, -28, 0, 2)
-closeBtn.BackgroundColor3 = Color3.fromRGB(110, 0, 160)
-closeBtn.Text = "X"
-closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextSize = 14
-closeBtn.BorderSizePixel = 0
-closeBtn.AutoButtonColor = false
-closeBtn.Parent = Title
-Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(1, 0)
-
-closeBtn.MouseEnter:Connect(function()
-	game:GetService("TweenService"):Create(closeBtn, TweenInfo.new(0.15), {
-		BackgroundColor3 = Color3.fromRGB(150, 0, 200)
-	}):Play()
-end)
-
-closeBtn.MouseLeave:Connect(function()
-	game:GetService("TweenService"):Create(closeBtn, TweenInfo.new(0.15), {
-		BackgroundColor3 = Color3.fromRGB(110, 0, 160)
-	}):Play()
-end)
-
-closeBtn.MouseButton1Click:Connect(function()
-	screenGui:Destroy()
-end)
-
-local button = Instance.new("TextButton")
-button.Size = UDim2.new(1, 0, 0, 30)
-button.Position = UDim2.new(0, 0, 0.70, 0)
-button.AnchorPoint = Vector2.new(0, 0.5)
-button.BackgroundColor3 = Color3.fromRGB(100, 0, 150)
-button.TextColor3 = Color3.fromRGB(255, 255, 255)
-button.Text = "Rejoin"
-button.Font = Enum.Font.GothamMedium
-button.TextSize = 16
-button.AutoButtonColor = false
-button.Parent = UI
-Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
-
-button.MouseEnter:Connect(function()
-	game:GetService("TweenService"):Create(button, TweenInfo.new(0.2), {
-		BackgroundColor3 = Color3.fromRGB(170, 0, 220)
-	}):Play()
-end)
-
-button.MouseLeave:Connect(function()
-	game:GetService("TweenService"):Create(button, TweenInfo.new(0.2), {
-		BackgroundColor3 = Color3.fromRGB(100, 0, 150)
-	}):Play()
-end)
-
-local TeleportService = game:GetService("TeleportService")
-local Players = game:GetService("Players")
-local teleporting = false
-local player = Players.LocalPlayer
-
-button.MouseButton1Click:Connect(function()
-	if teleporting then return end
-	teleporting = true
-	pcall(function()
-		TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player)
-	end)
-end)
-
--- Job Id Joiner
--- Job Id Joiner
--- Job Id Joiner
--- Job Id Joiner
--- Job Id Joiner
--- Job Id Joiner
--- Job Id Joiner
--- Job Id Joiner
-
-local Players = game:GetService("Players")
-local TeleportService = game:GetService("TeleportService")
 local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
 local LocalPlayer = Players.LocalPlayer
-
 local PLACE_ID = game.PlaceId
 
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "JobIDGui"
-screenGui.ResetOnSpawn = false
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
-screenGui.DisplayOrder = 2147483647
-screenGui.Parent = game:GetService("CoreGui")
+local function createUICorner(parent, radius)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = radius
+    corner.Parent = parent
+    return corner
+end
 
-local UI = Instance.new("Frame")
-UI.Size = UDim2.new(0, 140, 0, 65)
-UI.AnchorPoint = Vector2.new(1, 0)
-UI.Position = UDim2.new(1, -10, 0, 10)
-UI.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
-UI.BorderSizePixel = 0
-UI.Parent = screenGui
-Instance.new("UICorner", UI).CornerRadius = UDim.new(0, 10)
+if RejoinGui == true then
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "RejoinCompactUI"
+    screenGui.ResetOnSpawn = false
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+    screenGui.DisplayOrder = 2147483647
+    screenGui.Parent = game:GetService("CoreGui")
 
-local outline = Instance.new("Frame")
-outline.Size = UDim2.new(1, 0, 1, 0)
-outline.BackgroundColor3 = Color3.fromRGB(90, 0, 140)
-outline.BorderSizePixel = 0
-outline.ZIndex = UI.ZIndex - 1
-outline.Parent = UI
-Instance.new("UICorner", outline).CornerRadius = UDim.new(0, 10)
+    local UI = Instance.new("Frame")
+    UI.Size = UDim2.new(0, 140, 0, 65)
+    UI.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
+    UI.BorderSizePixel = 0
+    UI.Parent = screenGui
+    createUICorner(UI, UDim.new(0, 10))
 
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 28)
-Title.BackgroundColor3 = Color3.fromRGB(80, 0, 120)
-Title.BorderSizePixel = 0
-Title.Text = "Job ID Joiner"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 16
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.Parent = UI
-Instance.new("UIPadding", Title).PaddingLeft = UDim.new(0, 8)
-Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 8)
+    local outline = Instance.new("Frame")
+    outline.Size = UDim2.new(1, 0, 1, 0)
+    outline.BackgroundColor3 = Color3.fromRGB(90, 0, 140)
+    outline.BorderSizePixel = 0
+    outline.ZIndex = UI.ZIndex - 1
+    outline.Parent = UI
+    createUICorner(outline, UDim.new(0, 10))
 
-local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 24, 0, 24)
-closeBtn.Position = UDim2.new(1, -28, 0, 2)
-closeBtn.BackgroundColor3 = Color3.fromRGB(110, 0, 160)
-closeBtn.Text = "X"
-closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextSize = 14
-closeBtn.BorderSizePixel = 0
-closeBtn.AutoButtonColor = false
-closeBtn.Parent = Title
-Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(1, 0)
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(1, 0, 0, 28)
+    Title.BackgroundColor3 = Color3.fromRGB(80, 0, 120)
+    Title.BorderSizePixel = 0
+    Title.Text = "Rejoin Menu"
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.Font = Enum.Font.GothamBold
+    Title.TextSize = 16
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.Parent = UI
+    Instance.new("UIPadding", Title).PaddingLeft = UDim.new(0, 8)
+    createUICorner(Title, UDim.new(0, 8))
 
-closeBtn.MouseEnter:Connect(function()
-    TweenService:Create(closeBtn, TweenInfo.new(0.15), {
-        BackgroundColor3 = Color3.fromRGB(150, 0, 200)
-    }):Play()
-end)
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.new(0, 24, 0, 24)
+    closeBtn.Position = UDim2.new(1, -28, 0, 2)
+    closeBtn.BackgroundColor3 = Color3.fromRGB(110, 0, 160)
+    closeBtn.Text = "X"
+    closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.TextSize = 14
+    closeBtn.BorderSizePixel = 0
+    closeBtn.AutoButtonColor = false
+    closeBtn.Parent = Title
+    createUICorner(closeBtn, UDim.new(1, 0))
 
-closeBtn.MouseLeave:Connect(function()
-    TweenService:Create(closeBtn, TweenInfo.new(0.15), {
-        BackgroundColor3 = Color3.fromRGB(110, 0, 160)
-    }):Play()
-end)
+    closeBtn.MouseEnter:Connect(function()
+        TweenService:Create(closeBtn, TweenInfo.new(0.15), {
+            BackgroundColor3 = Color3.fromRGB(150, 0, 200)
+        }):Play()
+    end)
 
-closeBtn.MouseButton1Click:Connect(function()
-    screenGui:Destroy()
-end)
+    closeBtn.MouseLeave:Connect(function()
+        TweenService:Create(closeBtn, TweenInfo.new(0.15), {
+            BackgroundColor3 = Color3.fromRGB(110, 0, 160)
+        }):Play()
+    end)
 
-local textBox = Instance.new("TextBox")
-textBox.Size = UDim2.new(1, -40, 0, 22)
-textBox.Position = UDim2.new(0, 8, 0, 34)
-textBox.PlaceholderText = "Job ID"
-textBox.Text = ""
-textBox.ClearTextOnFocus = false
-textBox.Font = Enum.Font.GothamMedium
-textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-textBox.TextSize = 14
-textBox.BackgroundColor3 = Color3.fromRGB(50, 0, 80)
-textBox.BorderSizePixel = 0
-textBox.Parent = UI
-Instance.new("UICorner", textBox).CornerRadius = UDim.new(0, 6)
+    closeBtn.MouseButton1Click:Connect(function()
+        screenGui:Destroy()
+    end)
 
-textBox.Focused:Connect(function()
-    textBox.Text = ""
-end)
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(1, 0, 0, 30)
+    button.Position = UDim2.new(0, 0, 0.70, 0)
+    button.AnchorPoint = Vector2.new(0, 0.5)
+    button.BackgroundColor3 = Color3.fromRGB(100, 0, 150)
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Text = "Rejoin"
+    button.Font = Enum.Font.GothamMedium
+    button.TextSize = 16
+    button.AutoButtonColor = false
+    button.Parent = UI
+    createUICorner(button, UDim.new(0, 6))
 
-local joinBtn = Instance.new("TextButton")
-joinBtn.Size = UDim2.new(0, 40, 0, 22)
-joinBtn.Position = UDim2.new(1, -48, 0, 34)
-joinBtn.Text = "Join"
-joinBtn.Font = Enum.Font.GothamMedium
-joinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-joinBtn.TextSize = 14
-joinBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 150)
-joinBtn.BorderSizePixel = 0
-joinBtn.AutoButtonColor = false
-joinBtn.Parent = UI
-Instance.new("UICorner", joinBtn).CornerRadius = UDim.new(0, 6)
+    button.MouseEnter:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(170, 0, 220)
+        }):Play()
+    end)
 
-joinBtn.MouseEnter:Connect(function()
-    TweenService:Create(joinBtn, TweenInfo.new(0.2), {
-        BackgroundColor3 = Color3.fromRGB(170, 0, 220)
-    }):Play()
-end)
+    button.MouseLeave:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(100, 0, 150)
+        }):Play()
+    end)
 
-joinBtn.MouseLeave:Connect(function()
-    TweenService:Create(joinBtn, TweenInfo.new(0.2), {
-        BackgroundColor3 = Color3.fromRGB(100, 0, 150)
-    }):Play()
-end)
+    local teleporting = false
 
-local teleporting = false
-joinBtn.MouseButton1Click:Connect(function()
-    if teleporting then return end
-    local jobId = textBox.Text
-    if jobId and jobId ~= "" then
+    button.MouseButton1Click:Connect(function()
+        if teleporting then return end
         teleporting = true
         pcall(function()
-            TeleportService:TeleportToPlaceInstance(PLACE_ID, jobId, LocalPlayer)
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
         end)
-    end
-end)
+    end)
+end
 
-TeleportService.TeleportInitFailed:Connect(function(player, teleportResult, errorMessage)
-    if player == LocalPlayer then
-        teleporting = false
-        -- silently fail
-    end
-end)
+-- Job Id Joiner
+-- Job Id Joiner
+-- Job Id Joiner
+-- Job Id Joiner
+-- Job Id Joiner
+-- Job Id Joiner
+-- Job Id Joiner
+-- Job Id Joiner
 
+if JobIDJoiner == true then
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "JobIDGui"
+    screenGui.ResetOnSpawn = false
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+    screenGui.DisplayOrder = 2147483647
+    screenGui.Parent = game:GetService("CoreGui")
+
+    local UI = Instance.new("Frame")
+    UI.Size = UDim2.new(0, 140, 0, 65)
+    UI.AnchorPoint = Vector2.new(1, 0)
+    UI.Position = UDim2.new(1, -10, 0, 10)
+    UI.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
+    UI.BorderSizePixel = 0
+    UI.Parent = screenGui
+    createUICorner(UI, UDim.new(0, 10))
+
+    local outline = Instance.new("Frame")
+    outline.Size = UDim2.new(1, 0, 1, 0)
+    outline.BackgroundColor3 = Color3.fromRGB(90, 0, 140)
+    outline.BorderSizePixel = 0
+    outline.ZIndex = UI.ZIndex - 1
+    outline.Parent = UI
+    createUICorner(outline, UDim.new(0, 10))
+
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(1, 0, 0, 28)
+    Title.BackgroundColor3 = Color3.fromRGB(80, 0, 120)
+    Title.BorderSizePixel = 0
+    Title.Text = "Job ID Joiner"
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.Font = Enum.Font.GothamBold
+    Title.TextSize = 16
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.Parent = UI
+    Instance.new("UIPadding", Title).PaddingLeft = UDim.new(0, 8)
+    createUICorner(Title, UDim.new(0, 8))
+
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.new(0, 24, 0, 24)
+    closeBtn.Position = UDim2.new(1, -28, 0, 2)
+    closeBtn.BackgroundColor3 = Color3.fromRGB(110, 0, 160)
+    closeBtn.Text = "X"
+    closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.TextSize = 14
+    closeBtn.BorderSizePixel = 0
+    closeBtn.AutoButtonColor = false
+    closeBtn.Parent = Title
+    createUICorner(closeBtn, UDim.new(1, 0))
+
+    closeBtn.MouseEnter:Connect(function()
+        TweenService:Create(closeBtn, TweenInfo.new(0.15), {
+            BackgroundColor3 = Color3.fromRGB(150, 0, 200)
+        }):Play()
+    end)
+
+    closeBtn.MouseLeave:Connect(function()
+        TweenService:Create(closeBtn, TweenInfo.new(0.15), {
+            BackgroundColor3 = Color3.fromRGB(110, 0, 160)
+        }):Play()
+    end)
+
+    closeBtn.MouseButton1Click:Connect(function()
+        screenGui:Destroy()
+    end)
+
+    local textBox = Instance.new("TextBox")
+    textBox.Size = UDim2.new(1, -40, 0, 22)
+    textBox.Position = UDim2.new(0, 8, 0, 34)
+    textBox.PlaceholderText = "Job ID"
+    textBox.Text = ""
+    textBox.ClearTextOnFocus = false
+    textBox.Font = Enum.Font.GothamMedium
+    textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    textBox.TextSize = 14
+    textBox.BackgroundColor3 = Color3.fromRGB(50, 0, 80)
+    textBox.BorderSizePixel = 0
+    textBox.Parent = UI
+    createUICorner(textBox, UDim.new(0, 6))
+
+    textBox.Focused:Connect(function()
+        textBox.Text = ""
+    end)
+
+    local joinBtn = Instance.new("TextButton")
+    joinBtn.Size = UDim2.new(0, 40, 0, 22)
+    joinBtn.Position = UDim2.new(1, -48, 0, 34)
+    joinBtn.Text = "Join"
+    joinBtn.Font = Enum.Font.GothamMedium
+    joinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    joinBtn.TextSize = 14
+    joinBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 150)
+    joinBtn.BorderSizePixel = 0
+    joinBtn.AutoButtonColor = false
+    joinBtn.Parent = UI
+    createUICorner(joinBtn, UDim.new(0, 6))
+
+    joinBtn.MouseEnter:Connect(function()
+        TweenService:Create(joinBtn, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(170, 0, 220)
+        }):Play()
+    end)
+
+    joinBtn.MouseLeave:Connect(function()
+        TweenService:Create(joinBtn, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(100, 0, 150)
+        }):Play()
+    end)
+
+    local teleporting = false
+    joinBtn.MouseButton1Click:Connect(function()
+        if teleporting then return end
+        local jobId = textBox.Text
+        if jobId and jobId ~= "" then
+            teleporting = true
+            pcall(function()
+                TeleportService:TeleportToPlaceInstance(PLACE_ID, jobId, LocalPlayer)
+            end)
+        end
+    end)
+
+    TeleportService.TeleportInitFailed:Connect(function(player, teleportResult, errorMessage)
+        if player == LocalPlayer then
+            teleporting = false
+            -- silently fail
+        end
+    end)
+end
 
 -- Base Timer
 -- Base Timer
