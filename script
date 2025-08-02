@@ -215,7 +215,6 @@ local function isFriendBase(plot)
 		if player ~= LocalPlayer and LocalPlayer:IsFriendsWith(player.UserId) then
 			local displayNameLower = player.DisplayName:lower()
 			if textLower:find(displayNameLower .. "'s base") or textLower:find(displayNameLower .. "’s base") then
-				print("[Brainrot ESP] Skipping friend IN GAME base:", plot.Name, "Owner:", player.DisplayName)
 				return true
 			end
 		end
@@ -310,6 +309,7 @@ local function scanAndUpdate()
 end
 
 RunService.Heartbeat:Connect(scanAndUpdate)
+
 
 -- Proximity Prompt
 -- Proximity Prompt
