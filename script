@@ -253,7 +253,7 @@ local function scanAndUpdate()
 								if overhead then
 									local stolenLabel = overhead:FindFirstChild("Stolen")
 									if stolenLabel and stolenLabel:IsA("TextLabel") then
-										if stolenLabel.Visible and stolenLabel.Text == "IN MACHINE" then
+										if stolenLabel.Visible and stolenLabel.Text == "THIS LINE IS DISABLED BECAUSE OF THIS" then
 											continue
 										end
 									end
